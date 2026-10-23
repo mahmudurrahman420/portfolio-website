@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mahmudur Rahman | Portfolio & Personal Website</title>
+  <meta name="description" content="Personal portfolio and developer showcase for Mahmudur Rahman.">
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts & Font Awesome for icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body data-theme="dark">
+  <!-- Navigation Bar -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="logo">
+        <span class="logo-symbol">&lt;/&gt;</span>
+        <span class="logo-text">Mahmudur<span class="accent-dot">.</span></span>
+      </a>
+
+      <nav class="nav-links" id="nav-menu">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#contact" class="nav-link">Contact</a>
+        <a href="#contact" class="btn btn-sm btn-primary nav-cta">Get in Touch</a>
+      </nav>
+
+      <div class="nav-controls">
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle light/dark theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="home">
+    <div class="hero-bg-glow"></div>
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-indicator"></span>
+          <span>Available for projects & opportunities</span>
+        </div>
+        <h1 class="hero-title">
+          Hi, I'm <span class="gradient-text">Mahmudur Rahman</span>
+        </h1>
+        <h2 class="hero-subtitle">
+          I build <span id="typing-text" class="typed-text"></span><span class="cursor">&nbsp;</span>
+        </h2>
+        <p class="hero-description">
+          A passionate developer dedicated to creating clean, fast, and user-centric web applications and digital experiences that leave an impact.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">
+            <span>Explore Projects</span>
+            <i class="fa-solid fa-arrow-down"></i>
+          </a>
+          <a href="#contact" class="btn btn-secondary">
+            <span>Contact Me</span>
+            <i class="fa-regular fa-envelope"></i>
+          </a>
+        </div>
+
+        <div class="hero-socials">
+          <a href="https://github.com/mahmudurrahman420" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin-in"></i>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="mailto:contact@example.com" aria-label="Email">
+            <i class="fa-solid fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="code-card">
+          <div class="card-header">
+            <span class="circle red"></span>
+            <span class="circle yellow"></span>
+            <span class="circle green"></span>
+            <span class="card-filename">developer.js</span>
+          </div>
+          <pre class="card-body"><code><span class="code-keyword">const</span> <span class="code-var">developer</span> = {
+  <span class="code-prop">name</span>: <span class="code-str">'Mahmudur Rahman'</span>,
+  <span class="code-prop">role</span>: <span class="code-str">'Full-Stack Engineer'</span>,
+  <span class="code-prop">passions</span>: [
+    <span class="code-str">'Modern Web UI/UX'</span>,
+    <span class="code-str">'Scalable Systems'</span>,
+    <span class="code-str">'Open Source'</span>
+  ],
+  <span class="code-prop">status</span>: <span class="code-str">'Ready to build'</span>,
+  <span class="code-prop">code</span>: () =&gt; {
+    <span class="code-keyword">return</span> <span class="code-str">'Clean, high performance'</span>;
+  }
+};</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section about-section" id="about">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">About Me</span>
+        <h2 class="section-title">Turning Ideas into Reality</h2>
+        <p class="section-subtitle">A glimpse into who I am, my philosophy, and what drives my work.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card about-bio">
+          <h3>Crafting with purpose & precision</h3>
+          <p>
+            I specialize in building responsive, accessible, and fast web products. Whether it's architecting clean frontend interfaces or integrating backend logic, I focus on delivering seamless digital experiences.
+          </p>
+          <p>
+            Constantly learning new tools and paradigms, I enjoy translating complex technical challenges into simple, elegant, and maintainable software solutions.
+          </p>
+        </div>
+
+        <div class="about-card stats-card">
+          <div class="stat-item">
+            <span class="stat-number" data-target="15">0</span><span class="stat-plus">+</span>
+            <span class="stat-label">Projects Completed</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="100">0</span><span class="stat-plus">%</span>
+            <span class="stat-label">Client Satisfaction</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="3">0</span><span class="stat-plus">+</span>
+            <span class="stat-label">Years of Experience</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="99">0</span><span class="stat-plus">.9%</span>
+            <span class="stat-label">Uptime & Reliability</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="section skills-section" id="skills">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Tech Stack</span>
+        <h2 class="section-title">Skills & Technologies</h2>
+        <p class="section-subtitle">Core technologies and tools I utilize to craft modern software.</p>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-category">
+          <div class="category-header">
+            <i class="fa-solid fa-code"></i>
+            <h3>Frontend</h3>
+          </div>
+          <div class="skill-tags">
+            <span class="skill-badge"><i class="fa-brands fa-html5"></i> HTML5</span>
+            <span class="skill-badge"><i class="fa-brands fa-css3-alt"></i> CSS3</span>
+            <span class="skill-badge"><i class="fa-brands fa-js"></i> JavaScript (ES6+)</span>
+            <span class="skill-badge"><i class="fa-brands fa-react"></i> React</span>
+            <span class="skill-badge"><i class="fa-solid fa-wind"></i> Tailwind CSS</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <div class="category-header">
+            <i class="fa-solid fa-server"></i>
+            <h3>Backend & DB</h3>
+          </div>
+          <div class="skill-tags">
+            <span class="skill-badge"><i class="fa-brands fa-node"></i> Node.js</span>
+            <span class="skill-badge"><i class="fa-brands fa-python"></i> Python</span>
+            <span class="skill-badge"><i class="fa-solid fa-database"></i> PostgreSQL / MySQL</span>
+            <span class="skill-badge"><i class="fa-solid fa-bolt"></i> REST APIs</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <div class="category-header">
+            <i class="fa-solid fa-wrench"></i>
+            <h3>DevOps & Tools</h3>
+          </div>
+          <div class="skill-tags">
+            <span class="skill-badge"><i class="fa-brands fa-git-alt"></i> Git</span>
+            <span class="skill-badge"><i class="fa-brands fa-github"></i> GitHub</span>
+            <span class="skill-badge"><i class="fa-brands fa-docker"></i> Docker</span>
+            <span class="skill-badge"><i class="fa-solid fa-cloud"></i> CI/CD & Cloud</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section class="section projects-section" id="projects">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Portfolio</span>
+        <h2 class="section-title">Featured Projects</h2>
+        <p class="section-subtitle">A selection of recent applications and open source work.</p>
+      </div>
+
+      <div class="projects-grid">
+        <!-- Project 1 -->
+        <article class="project-card">
+          <div class="project-banner banner-1">
+            <div class="banner-icon"><i class="fa-solid fa-video"></i></div>
+          </div>
+          <div class="project-body">
+            <div class="project-tags">
+              <span>Web App</span>
+              <span>JavaScript</span>
+              <span>API</span>
+            </div>
+            <h3 class="project-title">Video Downloader & Processor</h3>
+            <p class="project-desc">
+              A streamlined online video downloading and media conversion utility designed for speed and intuitive user experience.
+            </p>
+            <div class="project-footer">
+              <a href="https://github.com/mahmudurrahman420/video-downloader" target="_blank" rel="noopener noreferrer" class="project-link">
+                <i class="fa-brands fa-github"></i> Source Code
+              </a>
+              <a href="#" class="project-link demo-link">
+                <span>Live Preview</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="project-card">
+          <div class="project-banner banner-2">
+            <div class="banner-icon"><i class="fa-solid fa-briefcase"></i></div>
+          </div>
+          <div class="project-body">
+            <div class="project-tags">
+              <span>Platform</span>
+              <span>Full-Stack</span>
+              <span>Jobs</span>
+            </div>
+            <h3 class="project-title">QatarHire Job Portal</h3>
+            <p class="project-desc">
+              Comprehensive job board and recruitment platform connecting skilled candidates with active job opportunities in the region.
+            </p>
+            <div class="project-footer">
+              <a href="https://github.com/mahmudurrahman420/qatarhire" target="_blank" rel="noopener noreferrer" class="project-link">
+                <i class="fa-brands fa-github"></i> Source Code
+              </a>
+              <a href="#" class="project-link demo-link">
+                <span>Live Preview</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="project-card">
+          <div class="project-banner banner-3">
+            <div class="banner-icon"><i class="fa-solid fa-palette"></i></div>
+          </div>
+          <div class="project-body">
+            <div class="project-tags">
+              <span>Creative</span>
+              <span>Design</span>
+              <span>Tool</span>
+            </div>
+            <h3 class="project-title">Framesmith Studio</h3>
+            <p class="project-desc">
+              A high-precision design and frame formatting tool enabling users to generate polished visual mockups and layouts in seconds.
+            </p>
+            <div class="project-footer">
+              <a href="https://github.com/mahmudurrahman420/framesmith" target="_blank" rel="noopener noreferrer" class="project-link">
+                <i class="fa-brands fa-github"></i> Source Code
+              </a>
+              <a href="#" class="project-link demo-link">
+                <span>Live Preview</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section contact-section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Get in Touch</span>
+        <h2 class="section-title">Let's Work Together</h2>
+        <p class="section-subtitle">Have an exciting idea or need help with a project? Let's connect.</p>
+      </div>
+
+      <div class="contact-wrapper">
+        <div class="contact-info">
+          <h3>Contact Details</h3>
+          <p>Feel free to reach out via message or through any of my social profiles.</p>
+          
+          <div class="contact-methods">
+            <div class="contact-item">
+              <div class="icon-box"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <span class="item-label">Email</span>
+                <span class="item-value">contact@mahmudurrahman.dev</span>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="icon-box"><i class="fa-solid fa-location-dot"></i></div>
+              <div>
+                <span class="item-label">Location</span>
+                <span class="item-value">Available Worldwide / Remote</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form class="contact-form" id="contact-form">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="John Doe" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" name="email" placeholder="john@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4" placeholder="Tell me about your project..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>Send Message</span>
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+          <div id="form-status" class="form-status"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; <span id="current-year"></span> Mahmudur Rahman. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#home">Back to top <i class="fa-solid fa-arrow-up"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
