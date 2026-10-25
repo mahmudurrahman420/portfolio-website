@@ -709,6 +709,30 @@
           name: "Duri Lifestyle",
           logo: "/logos/duri.png",
           website: "https://loveduri.com"
+        },
+        {
+          id: "client-elhano",
+          name: "Elhano",
+          logo: "/logos/elhano.svg",
+          website: "https://elhano.com"
+        },
+        {
+          id: "client-ilovepdf",
+          name: "iLovePDF",
+          logo: "/logos/ilovepdf.svg",
+          website: "https://www.ilovepdf.com"
+        },
+        {
+          id: "client-ieltsora",
+          name: "IELTSora",
+          logo: "/logos/ieltsora.png",
+          website: "https://ieltsora.com"
+        },
+        {
+          id: "client-pantoneclo",
+          name: "Pantoneclo",
+          logo: "/logos/pantoneclo.png",
+          website: "https://pantoneclo.com.bd"
         }
       ],
       vouchers: [
@@ -942,27 +966,16 @@
           } catch (e) {}
         }
 
-        // Apply recovered user data and ensure Daraz & Duri are always preserved
+        // Apply recovered user data and ensure all partner brands are preserved
         if (candidateClients.length > 0) {
-          const hasDaraz = candidateClients.some(c => c && c.name && /daraz/i.test(c.name));
-          const hasDuri = candidateClients.some(c => c && c.name && /duri/i.test(c.name));
           const mergedClients = [...candidateClients];
-          if (!hasDuri) {
-            mergedClients.unshift({
-              id: "client-duri",
-              name: "Duri Lifestyle",
-              logo: "/logos/duri.png",
-              website: "https://loveduri.com"
-            });
-          }
-          if (!hasDaraz) {
-            mergedClients.unshift({
-              id: "client-daraz",
-              name: "Daraz",
-              logo: "/logos/daraz.png",
-              website: "https://www.daraz.com.bd"
-            });
-          }
+          const defaultList = DEFAULT_STATE.clients || [];
+          defaultList.forEach(defItem => {
+            const exists = mergedClients.some(c => c && c.name && (c.name.toLowerCase().includes(defItem.name.toLowerCase()) || defItem.name.toLowerCase().includes(c.name.toLowerCase())));
+            if (!exists) {
+              mergedClients.push(defItem);
+            }
+          });
           state.clients = mergedClients;
         } else {
           state.clients = JSON.parse(JSON.stringify(DEFAULT_STATE.clients));
@@ -2689,7 +2702,7 @@
                 `;
               }
               return `
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-w-4xl mx-auto">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
                   ${rawClients.map((c) => `
                     <a href="${escapeHtml(c.website || '#')}" target="_blank" rel="noopener noreferrer" class="group bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 hover:border-teal-500/60 p-5 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-teal-500/10 cursor-pointer" title="Visit ${escapeHtml(c.name)} (${escapeHtml(c.website)})">
                       <div class="w-full h-16 flex items-center justify-center p-2 rounded-xl bg-white border border-slate-100 group-hover:border-teal-100 transition-colors overflow-hidden">
