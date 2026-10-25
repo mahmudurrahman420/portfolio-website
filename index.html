@@ -446,7 +446,7 @@
         <span class="text-slate-700">|</span>
         <button type="button" onclick="navigateTo('/pricing')" class="hover:text-white">Official BDT Pricing</button>
         <span class="text-slate-700">|</span>
-        <button type="button" onclick="navigateTo('/admin')" class="text-amber-300 hover:text-amber-200 font-semibold" id="topbar-admin-btn">
+        <button type="button" onclick="navigateTo('/admin-secret-portal')" class="text-amber-300 hover:text-amber-200 font-semibold" id="topbar-admin-btn">
           Admin Panel
         </button>
       </div>
@@ -574,7 +574,7 @@
         <button type="button" onclick="navigateTo('/software'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-semibold text-navy-900 bg-slate-100">Commerce Control POS</button>
         <button type="button" onclick="navigateTo('/about'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-medium text-slate-800 bg-slate-50">About Us</button>
         <button type="button" onclick="navigateTo('/faq'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-medium text-slate-800 bg-slate-50">FAQ</button>
-        <button type="button" onclick="navigateTo('/admin'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-medium text-amber-900 bg-amber-50">Admin Panel</button>
+        <button type="button" onclick="navigateTo('/admin-secret-portal'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-medium text-amber-900 bg-amber-50">Admin Panel</button>
         <button type="button" onclick="navigateTo('/contact'); toggleMobileMenu(false)" class="text-left px-3 py-2.5 rounded-lg font-bold text-white bg-teal-600">Get Started / Contact</button>
       </div>
     </div>
@@ -663,7 +663,7 @@
         <div class="flex items-center gap-4">
           <button type="button" onclick="navigateTo('/faq')" class="hover:text-white">FAQ</button>
           <button type="button" onclick="navigateTo('/contact')" class="hover:text-white">Contact</button>
-          <button type="button" onclick="navigateTo('/admin')" class="text-teal-400 hover:text-teal-300 font-semibold">Admin Login</button>
+          <button type="button" onclick="navigateTo('/admin-secret-portal')" class="text-teal-400 hover:text-teal-300 font-semibold">Admin Login</button>
         </div>
       </div>
     </div>
@@ -2117,7 +2117,7 @@
 
       if (fb) {
         fb.className = "rounded-xl p-4 text-xs bg-teal-50 text-teal-900 border border-teal-200";
-        fb.innerHTML = `<strong>Inquiry Saved (${escapeHtml(record.id)}):</strong> Thank you, ${escapeHtml(name)}! Your request for <em>${escapeHtml(service)}</em> has been stored. Our team will contact you shortly. (You can also view this record in the <button type="button" onclick="navigateTo('/admin')" class="underline font-bold">Admin Panel</button>.)`;
+        fb.innerHTML = `<strong>Inquiry Saved (${escapeHtml(record.id)}):</strong> Thank you, ${escapeHtml(name)}! Your request for <em>${escapeHtml(service)}</em> has been stored. Our team will contact you shortly. (You can also view this record in the <button type="button" onclick="navigateTo('/admin-secret-portal')" class="underline font-bold">Admin Panel</button>.)`;
         fb.classList.remove("hidden");
       }
       showToast("Inquiry Submitted (" + record.id + ")", "Saved to Lead Management database.");
@@ -4870,7 +4870,7 @@
       } else if (currentRoute.startsWith("/voucher/")) {
         const vId = currentRoute.replace("/voucher/", "").trim();
         main.innerHTML = renderVoucherPage(vId);
-      } else if (currentRoute === "/admin") {
+      } else if (currentRoute === "/admin-secret-portal") {
         main.innerHTML = renderAdminPage();
       } else {
         main.innerHTML = renderHomePage();
@@ -4887,17 +4887,46 @@
     });
 
     function resolveCurrentRoute() {
-      // 1. Check pathname first (e.g. /voucher/T383)
-      const path = window.location.pathname;
+      const host = (window.location.hostname || "").toLowerCase();
+      const isAdminHost = host.startsWith("adminpannel.") || host.startsWith("adminpanel.");
+      const path = window.location.pathname || "/";
+      const hash = window.location.hash.replace(/^#/, "");
+
+      // If accessed via admin subdomain (e.g. adminpannel.slmptech.com or adminpanel.slmptech.com)
+      if (isAdminHost) {
+        return "/admin-secret-portal";
+      }
+
+      // Check voucher route
       if (path && path.startsWith("/voucher/")) {
         return path;
       }
-      // 2. Check hash (e.g. #/voucher/T383 or #/admin)
-      const hash = window.location.hash.replace(/^#/, "");
+
+      // Secret obscure portal paths (cannot be guessed by visitors)
+      const secretPaths = [
+        "/login-gateway-9831",
+        "/portal-auth-secure",
+        "/adminpannel-login",
+        "/admin-secret-portal"
+      ];
+      if (secretPaths.includes(hash) || secretPaths.includes(path)) {
+        return "/admin-secret-portal";
+      }
+
+      // Block public #/admin guess completely - redirect to homepage
+      if (hash === "/admin" || path === "/admin") {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", "/");
+        }
+        return "/";
+      }
+
+      // Check hash
       if (hash && hash.startsWith("/")) {
         return hash;
       }
-      // 3. Fallback pathname if non-root
+
+      // Fallback pathname if non-root
       if (path && path !== "/" && path !== "/index.html") {
         return path;
       }
