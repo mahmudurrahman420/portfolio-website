@@ -490,8 +490,12 @@
 
         <!-- Primary CTAs -->
         <div class="hidden sm:flex items-center gap-2">
-          <button type="button" onclick="handleWhatsAppAction()" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors">
-            WhatsApp Us
+          <button type="button" onclick="handleFacebookAction(event)" class="px-3 py-2 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm" title="Visit our Facebook Page">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            <span>Facebook</span>
+          </button>
+          <button type="button" onclick="handleWhatsAppAction()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm" title="Chat on WhatsApp">
+            <span>💬 WhatsApp</span>
           </button>
           <button type="button" onclick="navigateTo('/contact')" class="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-teal-700 text-white font-semibold text-xs transition-colors">
             Get Started
@@ -635,11 +639,38 @@
         brandMessage: "Everything Your Business Needs to Grow Online, at a Price You Can Afford.",
         supportingStatement: "We help small businesses build websites, run digital advertising campaigns, track performance, manage sales and automate business operations without the high cost of a large agency.",
         contactEmail: "contact@slmptech.com",
-        whatsappNumber: "", // Configurable — never invent a phone number
+        whatsappNumber: "8801521212196",
+        facebookPageUrl: "https://facebook.com/slmptech",
         businessAddress: "[Configurable Business Address — Bangladesh]",
         businessHours: "Saturday – Thursday, 10:00 AM – 8:00 PM (BST)",
         softwareName: "Commerce Control"
       },
+      clients: [
+        {
+          id: "client-1",
+          name: "Apex Fashion BD",
+          logo: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=240&h=100&fit=crop&auto=format",
+          website: "https://example.com"
+        },
+        {
+          id: "client-2",
+          name: "Dhaka Gadget Hub",
+          logo: "https://images.unsplash.com/photo-1516876437184-593fda40c7ce?w=240&h=100&fit=crop&auto=format",
+          website: "https://example.com"
+        },
+        {
+          id: "client-3",
+          name: "Bengal Organic Foods",
+          logo: "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=240&h=100&fit=crop&auto=format",
+          website: "https://example.com"
+        },
+        {
+          id: "client-4",
+          name: "Care Pharmacy & Retail",
+          logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=240&h=100&fit=crop&auto=format",
+          website: "https://example.com"
+        }
+      ],
       officialPricing: [
         { id: "website-development", slug: "website-development", service: "Website development", originalPrice: "৳20,000", priceBdt: 10000, priceDisplay: "৳10,000", discount: "50% OFF", billing: "One time", summary: "Clearly scoped basic responsive business website or landing page." },
         { id: "website-pos", slug: "website-pos", service: "Website + POS setup", originalPrice: "৳30,000", priceBdt: 15000, priceDisplay: "৳15,000 starting", discount: "50% OFF", billing: "One time", summary: "Basic business website + setup of a suitable existing POS solution & initial training." },
@@ -776,6 +807,21 @@
         // Deep merge siteConfig so user edits are preserved
         if (parsed.siteConfig && typeof parsed.siteConfig === "object") {
           state.siteConfig = { ...state.siteConfig, ...parsed.siteConfig };
+        }
+
+        // Preserve clients array intact
+        if (parsed.clients && Array.isArray(parsed.clients) && parsed.clients.length > 0) {
+          state.clients = parsed.clients;
+        } else if (!state.clients || state.clients.length === 0) {
+          state.clients = JSON.parse(JSON.stringify(DEFAULT_STATE.clients || []));
+        }
+
+        // Ensure official WhatsApp number defaults to +8801521212196
+        if (!state.siteConfig.whatsappNumber || state.siteConfig.whatsappNumber.length < 10) {
+          state.siteConfig.whatsappNumber = "8801521212196";
+        }
+        if (!state.siteConfig.facebookPageUrl) {
+          state.siteConfig.facebookPageUrl = "https://facebook.com/slmptech";
         }
 
         // Preserve admin pricing items (including user additions/deletions)
@@ -1518,13 +1564,39 @@
       }
     }
 
+    function handleFacebookAction(event) {
+      if (event) event.preventDefault();
+      const fbUrl = (appState.siteConfig.facebookPageUrl || "").trim();
+      if (fbUrl && fbUrl.startsWith("http")) {
+        window.open(fbUrl, "_blank", "noopener,noreferrer");
+      } else {
+        const entered = prompt(
+          "Facebook Page link not configured in Admin yet.\nEnter your agency Facebook Page URL (e.g. https://facebook.com/slmptech):",
+          "https://facebook.com/slmptech"
+        );
+        if (entered && entered.trim().startsWith("http")) {
+          appState.siteConfig.facebookPageUrl = entered.trim();
+          saveState();
+          window.open(entered.trim(), "_blank", "noopener,noreferrer");
+        } else if (entered && entered.trim()) {
+          const fullUrl = "https://" + entered.trim();
+          appState.siteConfig.facebookPageUrl = fullUrl;
+          saveState();
+          window.open(fullUrl, "_blank", "noopener,noreferrer");
+        }
+      }
+    }
+
     function handleWhatsAppAction(packageName = "", priceText = "") {
-      let num = (appState.siteConfig.whatsappNumber || "").replace(/[^0-9]/g, "");
+      let num = (appState.siteConfig.whatsappNumber || "8801521212196").replace(/[^0-9]/g, "");
       if (!num || num.length < 10) {
-        num = (appState.siteConfig.contactPhone || "").replace(/[^0-9]/g, "");
+        num = (appState.siteConfig.contactPhone || "8801521212196").replace(/[^0-9]/g, "");
       }
       if (num.startsWith("01") && num.length === 11) {
         num = "88" + num;
+      }
+      if (!num || num.length < 10) {
+        num = "8801521212196";
       }
 
       let msg = "";
@@ -1535,23 +1607,7 @@
         msg = "Hello SLMPTech, I would like to inquire about your 50% discount digital growth packages and services.";
       }
 
-      if (num && num.length >= 10) {
-        window.open("https://wa.me/" + encodeURIComponent(num) + "?text=" + encodeURIComponent(msg), "_blank", "noopener,noreferrer");
-      } else {
-        const promptNumber = prompt(
-          "WhatsApp Number not configured in Admin yet.\nEnter your agency's WhatsApp number (e.g. 88017XXXXXXXX) or leave blank to open WhatsApp Web:",
-          "8801700000000"
-        );
-        if (promptNumber && promptNumber.trim()) {
-          const cleanPrompt = promptNumber.replace(/[^0-9]/g, "");
-          const finalPrompt = (cleanPrompt.startsWith("01") && cleanPrompt.length === 11) ? "88" + cleanPrompt : cleanPrompt;
-          appState.siteConfig.whatsappNumber = finalPrompt;
-          saveState();
-          window.open("https://wa.me/" + encodeURIComponent(finalPrompt) + "?text=" + encodeURIComponent(msg), "_blank", "noopener,noreferrer");
-        } else {
-          window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(msg), "_blank", "noopener,noreferrer");
-        }
-      }
+      window.open("https://wa.me/" + encodeURIComponent(num) + "?text=" + encodeURIComponent(msg), "_blank", "noopener,noreferrer");
     }
 
     function syncBrandUI() {
@@ -1949,8 +2005,12 @@
                 <button type="button" onclick="navigateTo('/pricing')" class="px-6 py-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 hover:border-teal-500/50 backdrop-blur-md transition-all">
                   Compare Official BDT Prices
                 </button>
-                <button type="button" onclick="handleWhatsAppAction()" class="px-5 py-3.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all" title="Chat on WhatsApp">
-                  <span>💬 WhatsApp Inquiries</span>
+                <button type="button" onclick="handleFacebookAction(event)" class="px-4 py-3.5 rounded-xl bg-[#1877F2]/90 hover:bg-[#1877F2] text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-900/30 transition-all" title="Visit our Facebook Page">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  <span>Facebook</span>
+                </button>
+                <button type="button" onclick="handleWhatsAppAction()" class="px-4 py-3.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all" title="Chat on WhatsApp">
+                  <span>💬 WhatsApp (+8801521212196)</span>
                 </button>
               </div>
             </div>
@@ -2035,6 +2095,49 @@
               </div>
             </div>
 
+          </div>
+        </section>
+
+        
+        <!-- VALUED CLIENTS & PARTNERS SHOWCASE (DYNAMIC WITH DIRECT REDIRECTS) -->
+        <section class="py-12 bg-white border-b border-slate-200">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono uppercase tracking-wider text-teal-700 font-bold">Client Success &amp; Partnerships</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 font-bold">Click to Visit Live Site</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-display font-bold text-slate-900 mt-1">Trusted By Bangladeshi Brands &amp; Businesses</h2>
+                <p class="text-xs text-slate-600 mt-1">Click on any client brand logo below to visit their live online store or official website.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="navigateTo('/contact')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors">
+                  Become a Partner →
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Clients Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              ${(appState.clients || []).map((c) => `
+                <a href="${escapeHtml(c.website || '#')}" target="_blank" rel="noopener noreferrer" class="group bg-slate-50 hover:bg-white rounded-2xl border border-slate-200 hover:border-teal-500/60 p-4 flex flex-col items-center justify-center text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-teal-500/10 cursor-pointer" title="Visit ${escapeHtml(c.name)} (${escapeHtml(c.website)})">
+                  <div class="w-full h-16 flex items-center justify-center p-2 rounded-xl bg-white border border-slate-100 group-hover:border-teal-100 transition-colors overflow-hidden">
+                    ${c.logo ? `
+                      <img src="${escapeHtml(c.logo)}" alt="${escapeHtml(c.name)}" class="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-300" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                      <div class="hidden w-full h-full items-center justify-center text-xs font-display font-bold text-slate-800">${escapeHtml(c.name)}</div>
+                    ` : `
+                      <div class="w-full h-full flex items-center justify-center text-xs font-display font-bold text-slate-800">${escapeHtml(c.name)}</div>
+                    `}
+                  </div>
+                  <div class="mt-2.5 w-full flex items-center justify-center gap-1">
+                    <span class="text-xs font-bold text-slate-800 group-hover:text-teal-700 truncate transition-colors">${escapeHtml(c.name)}</span>
+                    <svg class="w-3 h-3 text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  </div>
+                  <span class="text-[10px] text-teal-600 font-medium mt-0.5 group-hover:underline">Visit Website ↗</span>
+                </a>
+              `).join("")}
+            </div>
           </div>
         </section>
 
@@ -3019,6 +3122,78 @@
     }
 
     // --- Dynamic Pricing Items Management ---
+    
+    // --- Dynamic Client & Partner Management ---
+    function addAdminClientItem() {
+      if (!appState.adminSession.authenticated || appState.adminSession.role !== "SUPER_ADMIN") {
+        showToast("Unauthorized", "Only SUPER_ADMIN can add clients.", true);
+        return;
+      }
+      if (!appState.clients) appState.clients = [];
+      const newId = "client-" + Date.now().toString(36);
+      appState.clients.push({
+        id: newId,
+        name: "New Client Brand",
+        logo: "",
+        website: "https://"
+      });
+      saveState();
+      renderCurrentRoute();
+      showToast("Client Added", "New client slot created. Add logo URL and website, then click Save.");
+    }
+
+    function deleteAdminClientItem(index) {
+      if (!appState.adminSession.authenticated || appState.adminSession.role !== "SUPER_ADMIN") {
+        showToast("Unauthorized", "Only SUPER_ADMIN can delete clients.", true);
+        return;
+      }
+      const item = appState.clients[index];
+      const cName = item ? item.name : "client";
+      if (!confirm(`Are you sure you want to delete "${cName}"?`)) return;
+      appState.clients.splice(index, 1);
+      saveState();
+      renderCurrentRoute();
+      showToast("Client Removed", `"${cName}" has been removed.`);
+    }
+
+    function saveAdminClients(event) {
+      if (event) event.preventDefault();
+      if (!appState.adminSession.authenticated || appState.adminSession.role !== "SUPER_ADMIN") {
+        showToast("Forbidden (403)", "Only SUPER_ADMIN can modify clients.", true);
+        return;
+      }
+      if (!appState.clients) appState.clients = [];
+      appState.clients.forEach((c, idx) => {
+        const logoEl = document.getElementById(`adm-c-logo-${idx}`);
+        const nameEl = document.getElementById(`adm-c-name-${idx}`);
+        const webEl = document.getElementById(`adm-c-web-${idx}`);
+
+        if (logoEl) c.logo = logoEl.value.trim();
+        if (nameEl) c.name = nameEl.value.trim() || c.name;
+        if (webEl) c.website = webEl.value.trim() || c.website;
+      });
+
+      saveState();
+      renderCurrentRoute();
+      showToast("Clients Saved", "Client logos, names, and redirect links have been updated live!");
+    }
+
+    function previewClientLogo(idx) {
+      const input = document.getElementById(`adm-c-logo-${idx}`);
+      const img = document.getElementById(`adm-c-preview-${idx}`);
+      const fb = document.getElementById(`adm-c-fallback-${idx}`);
+      if (input && img && fb) {
+        if (input.value.trim()) {
+          img.src = input.value.trim();
+          img.classList.remove("hidden");
+          fb.classList.add("hidden");
+        } else {
+          img.classList.add("hidden");
+          fb.classList.remove("hidden");
+        }
+      }
+    }
+
     function addAdminPricingItem() {
       if (!appState.adminSession.authenticated || appState.adminSession.role !== "SUPER_ADMIN") {
         showToast("Unauthorized", "Only SUPER_ADMIN can add service options.", true);
@@ -3099,6 +3274,7 @@
       setVal("adm-cfg-supporting", "supportingStatement");
       setVal("adm-cfg-email", "contactEmail");
       setVal("adm-cfg-wa", "whatsappNumber");
+      setVal("adm-cfg-facebook", "facebookPageUrl");
       setVal("adm-cfg-addr", "businessAddress");
       setVal("adm-cfg-hours", "businessHours");
       setVal("adm-cfg-software", "softwareName");
@@ -3314,9 +3490,91 @@
             <button type="button" onclick="activeAdminSection='pricing'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'pricing' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
               🏷️ Services &amp; Pricing (${appState.officialPricing.length})
             </button>
-            <button type="button" onclick="activeAdminSection='brand'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'brand' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+            <button type="button" onclick="activeAdminSection='brand'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors 
+          <!-- TAB: CLIENTS & PARTNERS MANAGEMENT -->
+          ${activeTab === 'clients' ? `
+            <div class="space-y-6">
+              <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200">
+                <div>
+                  <h2 class="text-lg font-display font-bold text-slate-900">Clients &amp; Brand Partners Showcase</h2>
+                  <p class="text-xs text-slate-600 mt-0.5">Add client logos, names, and websites. When visitors click a client logo on your site, it will redirect directly to their website.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addAdminClientItem()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                    ➕ Add New Client
+                  </button>
+                  <button type="button" onclick="saveAdminClients(event)" class="px-5 py-2 rounded-xl bg-navy-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-colors">
+                    💾 Save All Clients
+                  </button>
+                </div>
+              </div>
+
+              <form onsubmit="saveAdminClients(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  ${(appState.clients || []).map((c, idx) => `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3 relative group hover:border-teal-500 transition-colors">
+                      <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <span class="text-[10px] font-mono uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">CLIENT #${idx + 1}</span>
+                        <button type="button" onclick="deleteAdminClientItem(${idx})" class="p-1 text-rose-500 hover:bg-rose-50 rounded-lg text-xs font-bold transition-colors" title="Delete client">
+                          🗑️ Delete
+                        </button>
+                      </div>
+
+                      <!-- Logo preview & input -->
+                      <div>
+                        <label class="block font-semibold text-slate-700 text-[11px] mb-1">Logo URL or Image Link *</label>
+                        <div class="flex items-center gap-2">
+                          <input type="url" id="adm-c-logo-${idx}" value="${escapeHtml(c.logo || '')}" oninput="previewClientLogo(${idx})" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-mono" placeholder="https://example.com/logo.png" />
+                          <div class="w-12 h-10 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                            <img id="adm-c-preview-${idx}" src="${escapeHtml(c.logo || '')}" alt="Logo" class="max-h-full max-w-full object-contain ${c.logo ? '' : 'hidden'}" onerror="this.classList.add('hidden')" />
+                            <span id="adm-c-fallback-${idx}" class="text-[10px] text-slate-400 ${c.logo ? 'hidden' : ''}">Logo</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Client / Brand Name -->
+                      <div>
+                        <label class="block font-semibold text-slate-700 text-[11px] mb-1">Client / Brand Name *</label>
+                        <input type="text" id="adm-c-name-${idx}" value="${escapeHtml(c.name || '')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900" placeholder="e.g. Apex BD, Dhaka Mart" />
+                      </div>
+
+                      <!-- Website Link -->
+                      <div>
+                        <label class="block font-semibold text-slate-700 text-[11px] mb-1">Client Website (Redirect URL) *</label>
+                        <input type="url" id="adm-c-web-${idx}" value="${escapeHtml(c.website || '')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs text-teal-700 font-mono" placeholder="https://clientbrand.com" />
+                      </div>
+
+                      <div class="pt-1">
+                        <a href="${escapeHtml(c.website || '#')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-teal-600 hover:text-teal-800 flex items-center gap-1">
+                          <span>Test Client Link ↗</span>
+                        </a>
+                      </div>
+                    </div>
+                  `).join("")}
+                </div>
+
+                ${(!appState.clients || appState.clients.length === 0) ? `
+                  <div class="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
+                    No clients added yet. Click <strong>➕ Add New Client</strong> above to add your first client brand logo and website link!
+                  </div>
+                ` : ''}
+
+                <div class="flex justify-end pt-2">
+                  <button type="submit" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-colors">
+                    💾 Save All Clients
+                  </button>
+                </div>
+              </form>
+            </div>
+          ` : ''}
+
+          ${activeTab === 'brand' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
               🏢 Brand, Hero &amp; Contact
             </button>
+            <button type="button" onclick="activeAdminSection='clients'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'clients' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              🤝 Clients &amp; Partners (${(appState.clients || []).length})
+            </button>
+            
             <button type="button" onclick="activeAdminSection='faqs'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'faqs' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
               ❓ FAQs Management (${getFaqs().length})
             </button>
@@ -3439,6 +3697,10 @@
                 <div>
                   <label class="block font-bold text-slate-800 mb-1">WhatsApp / Phone Number (BD)</label>
                   <input type="text" id="adm-cfg-wa" placeholder="017XXXXXXXX or +88017XXXXXXXX" value="${escapeHtml(appState.siteConfig.whatsappNumber || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Facebook Page URL</label>
+                  <input type="url" id="adm-cfg-facebook" placeholder="https://facebook.com/youragency" value="${escapeHtml(appState.siteConfig.facebookPageUrl || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
                 </div>
                 <div>
                   <label class="block font-bold text-slate-800 mb-1">Physical Office / Business Location</label>
