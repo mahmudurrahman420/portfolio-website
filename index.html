@@ -4124,7 +4124,166 @@
             <button type="button" onclick="activeAdminSection='pricing'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'pricing' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
               🏷️ Services &amp; Pricing (${appState.officialPricing.length})
             </button>
-            <button type="button" onclick="activeAdminSection='brand'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors 
+            <button type="button" onclick="activeAdminSection='brand'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'brand' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              🏢 Brand, Hero &amp; Contact
+            </button>
+            <button type="button" onclick="activeAdminSection='clients'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'clients' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              🤝 Clients &amp; Partners (${(appState.clients || []).length})
+            </button>
+            <button type="button" onclick="activeAdminSection='vouchers'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'vouchers' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              🧾 Vouchers Database (${(appState.vouchers || []).length})
+            </button>
+            
+            
+            <button type="button" onclick="activeAdminSection='faqs'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'faqs' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              ❓ FAQs Management (${getFaqs().length})
+            </button>
+            <button type="button" onclick="activeAdminSection='leads'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'leads' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              📊 Captured Leads (${appState.leads.length})
+            </button>
+            <button type="button" onclick="activeAdminSection='demos'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'demos' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              🖥️ Demo Requests (${appState.demoRequests.length})
+            </button>
+            <button type="button" onclick="activeAdminSection='system'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'system' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
+              ⚙️ Backup &amp; Tools
+            </button>
+          </div>
+
+          <!-- TAB 1: DYNAMIC SERVICES & PRICING -->
+          ${activeTab === 'pricing' ? `
+            <div class="space-y-6">
+              <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200">
+                <div>
+                  <h2 class="text-lg font-display font-bold text-slate-900">Official Services &amp; Pricing Schedule</h2>
+                  <p class="text-xs text-slate-600 mt-0.5">Modify any price, description, or billing period. You can add new service options or delete unwanted ones.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="addAdminPricingItem()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
+                    ➕ Add New Option
+                  </button>
+                  <button type="button" onclick="saveAdminPricing(event)" class="px-5 py-2 rounded-xl bg-navy-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-colors">
+                    💾 Save All Changes
+                  </button>
+                </div>
+              </div>
+
+              <form onsubmit="saveAdminPricing(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  ${appState.officialPricing.map((p, idx) => `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3 relative group hover:border-teal-500 transition-colors">
+                      <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <div class="flex-1">
+                          <span class="text-[10px] font-mono uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">ID: ${escapeHtml(p.id)}</span>
+                          <input type="text" id="adm-p-name-${idx}" value="${escapeHtml(p.service)}" class="mt-1 w-full font-display font-bold text-slate-900 text-sm border-b border-slate-200 focus:border-teal-600 focus:outline-none pb-0.5" placeholder="Service Name" />
+                        </div>
+                        <button type="button" onclick="deleteAdminPricingItem(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg text-xs font-bold transition-colors" title="Delete this option">
+                          🗑️ Delete (-)
+                        </button>
+                      </div>
+
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                        <div>
+                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Main / Cut Price (Crossed)</label>
+                          <input type="text" id="adm-p-orig-${idx}" value="${escapeHtml(p.originalPrice || '')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono text-slate-500" placeholder="e.g. ৳10,000" />
+                        </div>
+                        <div>
+                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Discount Price (BIG)</label>
+                          <input type="text" id="adm-p-disp-${idx}" value="${escapeHtml(p.priceDisplay)}" class="w-full px-2.5 py-1.5 rounded-lg border border-teal-500 font-mono font-extrabold text-teal-700 bg-teal-50/30" placeholder="e.g. ৳5,000" />
+                        </div>
+                        <div>
+                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Discount Badge</label>
+                          <input type="text" id="adm-p-disc-${idx}" value="${escapeHtml(p.discount || '50% OFF')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-bold text-rose-600" placeholder="50% OFF" />
+                        </div>
+                        <div>
+                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Billing Cycle</label>
+                          <input type="text" id="adm-p-bill-${idx}" value="${escapeHtml(p.billing)}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300" placeholder="One time / Per month" />
+                        </div>
+                      </div>
+
+                      <div class="text-xs">
+                        <label class="block font-semibold text-slate-700 text-[11px] mb-1">Summary / Scope Description</label>
+                        <textarea id="adm-p-sum-${idx}" rows="2" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-700 focus:outline-none focus:border-teal-600" placeholder="Scope & deliverables summary">${escapeHtml(p.summary || '')}</textarea>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                  <button type="button" onclick="addAdminPricingItem()" class="px-4 py-2.5 rounded-xl border border-dashed border-teal-600 text-teal-700 hover:bg-teal-50 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                    ➕ Add Another Service / Price Option
+                  </button>
+                  <button type="submit" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors">
+                    💾 Save All Pricing Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          ` : ''}
+
+          <!-- TAB 2: BRAND, HERO & CONTACT INFO -->
+          ${activeTab === 'brand' ? `
+            <form onsubmit="saveAdminBrand(event)" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 text-xs shadow-sm">
+              <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-display font-bold text-slate-900">Brand, Hero &amp; Contact Settings</h2>
+                  <p class="text-xs text-slate-600 mt-0.5">Edit headline, tagline, mission statement, and communication details across the entire site.</p>
+                </div>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition-colors">
+                  💾 Save Brand Settings
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Agency Brand Name</label>
+                  <input type="text" id="adm-cfg-name" value="${escapeHtml(appState.siteConfig.agencyName)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Brand Tagline / Badge Message</label>
+                  <input type="text" id="adm-cfg-tagline" value="${escapeHtml(appState.siteConfig.brandMessage)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block font-bold text-slate-800 mb-1">Hero Main Headline</label>
+                  <input type="text" id="adm-cfg-headline" value="${escapeHtml(appState.siteConfig.heroHeadline || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block font-bold text-slate-800 mb-1">Supporting Mission Statement</label>
+                  <textarea id="adm-cfg-supporting" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-300">${escapeHtml(appState.siteConfig.supportingStatement)}</textarea>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Primary Contact Email</label>
+                  <input type="email" id="adm-cfg-email" value="${escapeHtml(appState.siteConfig.contactEmail)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">WhatsApp / Phone Number (BD)</label>
+                  <input type="text" id="adm-cfg-wa" placeholder="017XXXXXXXX or +88017XXXXXXXX" value="${escapeHtml(appState.siteConfig.whatsappNumber || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Facebook Page URL</label>
+                  <input type="url" id="adm-cfg-facebook" placeholder="https://facebook.com/youragency" value="${escapeHtml(appState.siteConfig.facebookPageUrl || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Physical Office / Business Location</label>
+                  <input type="text" id="adm-cfg-addr" value="${escapeHtml(appState.siteConfig.businessAddress)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Business Working Hours</label>
+                  <input type="text" id="adm-cfg-hours" value="${escapeHtml(appState.siteConfig.businessHours)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-800 mb-1">Software / SaaS Product Name</label>
+                  <input type="text" id="adm-cfg-software" value="${escapeHtml(appState.siteConfig.softwareName)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 flex justify-end">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors">
+                  💾 Save All Brand &amp; Contact Settings
+                </button>
+              </div>
+            </form>
+          ` : ''}
+
           <!-- TAB: CLIENTS & PARTNERS MANAGEMENT -->
           
           <!-- TAB: VOUCHERS DATABASE & GENERATOR -->
@@ -4508,166 +4667,6 @@
                 </div>
               </form>
             </div>
-          ` : ''}
-
-          ${activeTab === 'brand' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              🏢 Brand, Hero &amp; Contact
-            </button>
-            <button type="button" onclick="activeAdminSection='clients'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'clients' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              🤝 Clients &amp; Partners (${(appState.clients || []).length})
-            </button>
-            <button type="button" onclick="activeAdminSection='vouchers'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'vouchers' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              🧾 Vouchers Database (${(appState.vouchers || []).length})
-            </button>
-            
-            
-            <button type="button" onclick="activeAdminSection='faqs'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'faqs' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              ❓ FAQs Management (${getFaqs().length})
-            </button>
-            <button type="button" onclick="activeAdminSection='leads'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'leads' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              📊 Captured Leads (${appState.leads.length})
-            </button>
-            <button type="button" onclick="activeAdminSection='demos'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'demos' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              🖥️ Demo Requests (${appState.demoRequests.length})
-            </button>
-            <button type="button" onclick="activeAdminSection='system'; renderCurrentRoute()" class="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${activeTab === 'system' ? 'bg-navy-900 text-white shadow' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}">
-              ⚙️ Backup &amp; Tools
-            </button>
-          </div>
-
-          <!-- TAB 1: DYNAMIC SERVICES & PRICING -->
-          ${activeTab === 'pricing' ? `
-            <div class="space-y-6">
-              <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200">
-                <div>
-                  <h2 class="text-lg font-display font-bold text-slate-900">Official Services &amp; Pricing Schedule</h2>
-                  <p class="text-xs text-slate-600 mt-0.5">Modify any price, description, or billing period. You can add new service options or delete unwanted ones.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="addAdminPricingItem()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
-                    ➕ Add New Option
-                  </button>
-                  <button type="button" onclick="saveAdminPricing(event)" class="px-5 py-2 rounded-xl bg-navy-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-colors">
-                    💾 Save All Changes
-                  </button>
-                </div>
-              </div>
-
-              <form onsubmit="saveAdminPricing(event)" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  ${appState.officialPricing.map((p, idx) => `
-                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3 relative group hover:border-teal-500 transition-colors">
-                      <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
-                        <div class="flex-1">
-                          <span class="text-[10px] font-mono uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">ID: ${escapeHtml(p.id)}</span>
-                          <input type="text" id="adm-p-name-${idx}" value="${escapeHtml(p.service)}" class="mt-1 w-full font-display font-bold text-slate-900 text-sm border-b border-slate-200 focus:border-teal-600 focus:outline-none pb-0.5" placeholder="Service Name" />
-                        </div>
-                        <button type="button" onclick="deleteAdminPricingItem(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg text-xs font-bold transition-colors" title="Delete this option">
-                          🗑️ Delete (-)
-                        </button>
-                      </div>
-
-                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                        <div>
-                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Main / Cut Price (Crossed)</label>
-                          <input type="text" id="adm-p-orig-${idx}" value="${escapeHtml(p.originalPrice || '')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono text-slate-500" placeholder="e.g. ৳10,000" />
-                        </div>
-                        <div>
-                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Discount Price (BIG)</label>
-                          <input type="text" id="adm-p-disp-${idx}" value="${escapeHtml(p.priceDisplay)}" class="w-full px-2.5 py-1.5 rounded-lg border border-teal-500 font-mono font-extrabold text-teal-700 bg-teal-50/30" placeholder="e.g. ৳5,000" />
-                        </div>
-                        <div>
-                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Discount Badge</label>
-                          <input type="text" id="adm-p-disc-${idx}" value="${escapeHtml(p.discount || '50% OFF')}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-bold text-rose-600" placeholder="50% OFF" />
-                        </div>
-                        <div>
-                          <label class="block font-semibold text-slate-700 text-[11px] mb-1">Billing Cycle</label>
-                          <input type="text" id="adm-p-bill-${idx}" value="${escapeHtml(p.billing)}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300" placeholder="One time / Per month" />
-                        </div>
-                      </div>
-
-                      <div class="text-xs">
-                        <label class="block font-semibold text-slate-700 text-[11px] mb-1">Summary / Scope Description</label>
-                        <textarea id="adm-p-sum-${idx}" rows="2" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-700 focus:outline-none focus:border-teal-600" placeholder="Scope & deliverables summary">${escapeHtml(p.summary || '')}</textarea>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                  <button type="button" onclick="addAdminPricingItem()" class="px-4 py-2.5 rounded-xl border border-dashed border-teal-600 text-teal-700 hover:bg-teal-50 text-xs font-bold flex items-center gap-1.5 transition-colors">
-                    ➕ Add Another Service / Price Option
-                  </button>
-                  <button type="submit" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors">
-                    💾 Save All Pricing Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          ` : ''}
-
-          <!-- TAB 2: BRAND, HERO & CONTACT INFO -->
-          ${activeTab === 'brand' ? `
-            <form onsubmit="saveAdminBrand(event)" class="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 text-xs shadow-sm">
-              <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
-                <div>
-                  <h2 class="text-lg font-display font-bold text-slate-900">Brand, Hero &amp; Contact Settings</h2>
-                  <p class="text-xs text-slate-600 mt-0.5">Edit headline, tagline, mission statement, and communication details across the entire site.</p>
-                </div>
-                <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition-colors">
-                  💾 Save Brand Settings
-                </button>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Agency Brand Name</label>
-                  <input type="text" id="adm-cfg-name" value="${escapeHtml(appState.siteConfig.agencyName)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Brand Tagline / Badge Message</label>
-                  <input type="text" id="adm-cfg-tagline" value="${escapeHtml(appState.siteConfig.brandMessage)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="block font-bold text-slate-800 mb-1">Hero Main Headline</label>
-                  <input type="text" id="adm-cfg-headline" value="${escapeHtml(appState.siteConfig.heroHeadline || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold" />
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="block font-bold text-slate-800 mb-1">Supporting Mission Statement</label>
-                  <textarea id="adm-cfg-supporting" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-300">${escapeHtml(appState.siteConfig.supportingStatement)}</textarea>
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Primary Contact Email</label>
-                  <input type="email" id="adm-cfg-email" value="${escapeHtml(appState.siteConfig.contactEmail)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">WhatsApp / Phone Number (BD)</label>
-                  <input type="text" id="adm-cfg-wa" placeholder="017XXXXXXXX or +88017XXXXXXXX" value="${escapeHtml(appState.siteConfig.whatsappNumber || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Facebook Page URL</label>
-                  <input type="url" id="adm-cfg-facebook" placeholder="https://facebook.com/youragency" value="${escapeHtml(appState.siteConfig.facebookPageUrl || '')}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Physical Office / Business Location</label>
-                  <input type="text" id="adm-cfg-addr" value="${escapeHtml(appState.siteConfig.businessAddress)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Business Working Hours</label>
-                  <input type="text" id="adm-cfg-hours" value="${escapeHtml(appState.siteConfig.businessHours)}" class="w-full px-3 py-2 rounded-xl border border-slate-300" />
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-800 mb-1">Software / SaaS Product Name</label>
-                  <input type="text" id="adm-cfg-software" value="${escapeHtml(appState.siteConfig.softwareName)}" class="w-full px-3 py-2 rounded-xl border border-slate-300 font-semibold" />
-                </div>
-              </div>
-
-              <div class="pt-3 border-t border-slate-100 flex justify-end">
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors">
-                  💾 Save All Brand &amp; Contact Settings
-                </button>
-              </div>
-            </form>
           ` : ''}
 
           <!-- TAB 3: DYNAMIC FAQS MANAGEMENT -->
