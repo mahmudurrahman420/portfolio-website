@@ -22,38 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS 3.4.17 -->
-  <script src="https://cdn.tailwindcss.com/3.4.17">    function cleanSiteCache() {
-      // 1. Snapshot all admin & user data before cleaning cache
-      const masterKey = "slmptech_official_v4_discount";
-      let savedData = null;
-      try {
-        savedData = localStorage.getItem(masterKey) || localStorage.getItem("slmptech_master_persistent_state");
-      } catch (e) {}
-
-      // 2. Clear browser HTTP CacheStorage and Service Workers
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name));
-        });
-      }
-
-      // 3. Clear temporary sessionStorage only
-      try {
-        sessionStorage.clear();
-      } catch (e) {}
-
-      // 4. Ensure admin database, pricing, and user leads remain 100% INTACT
-      try {
-        if (savedData) {
-          localStorage.setItem(masterKey, savedData);
-          localStorage.setItem("slmptech_master_persistent_state", savedData);
-        }
-      } catch (e) {}
-
-      // 5. Force a reload from server with cache-busting
-      window.location.reload(true);
-    }
-  </script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
     if (typeof tailwind !== "undefined") {
       tailwind.config = {
@@ -78,19 +47,7 @@
         }
       };
     }
-      function cleanSiteCache() {
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name));
-        });
-      }
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (e) {}
-      window.location.reload(true);
-    }
-  </script>
+      </script>
 
   <!-- Valid Structured Data (No fake reviews or unverified claims) -->
   <script id="json-ld-schema" type="application/ld+json">
@@ -119,19 +76,7 @@
       "Website Maintenance"
     ]
   }
-      function cleanSiteCache() {
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name));
-        });
-      }
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (e) {}
-      window.location.reload(true);
-    }
-  </script>
+      </script>
 
   <style>
     :root {
@@ -3739,15 +3684,47 @@
       updateMetadataAndBreadcrumbs(currentRoute);
     });
       function cleanSiteCache() {
+      const PERSISTENT_KEYS = [
+        "slmptech_official_v4_discount",
+        "slmptech_master_persistent_state",
+        "slmptech_official_v3",
+        "slmptech_official_v2",
+        "bd_affordable_digital_agency_v2"
+      ];
+
+      // 1. Snapshot all admin & user data
+      const backups = {};
+      PERSISTENT_KEYS.forEach(k => {
+        try {
+          const val = localStorage.getItem(k);
+          if (val) backups[k] = val;
+        } catch (e) {}
+      });
+
+      // 2. Clear browser HTTP CacheStorage and Service Workers
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => caches.delete(name));
         });
       }
+
+      // 3. Clear temporary sessionStorage only
       try {
-        localStorage.clear();
         sessionStorage.clear();
       } catch (e) {}
+
+      // 4. Restore and guarantee that ALL admin & user data remains 100% INTACT
+      try {
+        Object.keys(backups).forEach(k => {
+          localStorage.setItem(k, backups[k]);
+        });
+        if (typeof appState !== "undefined" && appState) {
+          const jsonStr = JSON.stringify(appState);
+          PERSISTENT_KEYS.forEach(k => localStorage.setItem(k, jsonStr));
+        }
+      } catch (e) {}
+
+      // 5. Force a reload from server with cache-busting
       window.location.reload(true);
     }
   </script>
