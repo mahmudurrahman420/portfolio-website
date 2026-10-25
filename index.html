@@ -697,32 +697,7 @@
         businessHours: "Saturday – Thursday, 10:00 AM – 8:00 PM (BST)",
         softwareName: "Commerce Control"
       },
-      clients: [
-        {
-          id: "client-1",
-          name: "Apex Fashion BD",
-          logo: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=240&h=100&fit=crop&auto=format",
-          website: "https://example.com"
-        },
-        {
-          id: "client-2",
-          name: "Dhaka Gadget Hub",
-          logo: "https://images.unsplash.com/photo-1516876437184-593fda40c7ce?w=240&h=100&fit=crop&auto=format",
-          website: "https://example.com"
-        },
-        {
-          id: "client-3",
-          name: "Bengal Organic Foods",
-          logo: "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=240&h=100&fit=crop&auto=format",
-          website: "https://example.com"
-        },
-        {
-          id: "client-4",
-          name: "Care Pharmacy & Retail",
-          logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=240&h=100&fit=crop&auto=format",
-          website: "https://example.com"
-        }
-      ],
+      clients: [],
       vouchers: [
         {
           orderId: "T383",
@@ -881,39 +856,92 @@
 
     function loadState() {
       try {
-        let raw = null;
-        for (const k of PERSISTENT_KEYS) {
-          const val = localStorage.getItem(k);
-          if (val) {
-            raw = val;
-            break;
-          }
-        }
-        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
-        
-        const parsed = JSON.parse(raw);
+        const DUMMY_CLIENT_NAMES = new Set([
+          "Apex Fashion BD",
+          "Dhaka Gadget Hub",
+          "Bengal Organic Foods",
+          "Care Pharmacy & Retail",
+          "New Client Brand"
+        ]);
+
         const state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        state.clients = [];
 
-        // Deep merge siteConfig so user edits are preserved
-        if (parsed.siteConfig && typeof parsed.siteConfig === "object") {
-          state.siteConfig = { ...state.siteConfig, ...parsed.siteConfig };
+        // Scan all storage keys across versions to recover any user data
+        let candidateClients = [];
+        let candidateVouchers = [];
+        let candidatePricing = [];
+        let candidateSiteConfig = {};
+        let candidateLeads = [];
+        let candidateDemoRequests = [];
+        let candidateCustomFaqs = [];
+
+        const allKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k) allKeys.push(k);
+        }
+        const scanKeys = Array.from(new Set([...PERSISTENT_KEYS, ...allKeys]));
+
+        for (const key of scanKeys) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (!raw || typeof raw !== "string" || !raw.trim().startsWith("{")) continue;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== "object") continue;
+
+            // Recover clients while strictly filtering out dummy placeholder brands
+            if (Array.isArray(parsed.clients) && parsed.clients.length > 0) {
+              const realClients = parsed.clients.filter(c => {
+                if (!c || typeof c !== "object") return false;
+                const name = (c.name || "").trim();
+                return name.length > 0 && !DUMMY_CLIENT_NAMES.has(name);
+              });
+              if (realClients.length > candidateClients.length) {
+                candidateClients = realClients;
+              }
+            }
+
+            // Recover vouchers
+            if (Array.isArray(parsed.vouchers) && parsed.vouchers.length > candidateVouchers.length) {
+              candidateVouchers = parsed.vouchers;
+            }
+
+            // Recover pricing customizations
+            if (Array.isArray(parsed.officialPricing) && parsed.officialPricing.length > candidatePricing.length) {
+              candidatePricing = parsed.officialPricing;
+            }
+
+            // Recover siteConfig customizations
+            if (parsed.siteConfig && typeof parsed.siteConfig === "object") {
+              candidateSiteConfig = { ...candidateSiteConfig, ...parsed.siteConfig };
+            }
+
+            // Recover leads & demo requests
+            if (Array.isArray(parsed.leads) && parsed.leads.length > candidateLeads.length) {
+              candidateLeads = parsed.leads;
+            }
+            if (Array.isArray(parsed.demoRequests) && parsed.demoRequests.length > candidateDemoRequests.length) {
+              candidateDemoRequests = parsed.demoRequests;
+            }
+            if (Array.isArray(parsed.customFaqs) && parsed.customFaqs.length > candidateCustomFaqs.length) {
+              candidateCustomFaqs = parsed.customFaqs;
+            }
+          } catch (e) {}
         }
 
-        // Preserve clients array intact
-        if (parsed.clients && Array.isArray(parsed.clients) && parsed.clients.length > 0) {
-          state.clients = parsed.clients;
-        } else if (!state.clients || state.clients.length === 0) {
-          state.clients = JSON.parse(JSON.stringify(DEFAULT_STATE.clients || []));
+        // Apply recovered user data
+        state.clients = candidateClients;
+        if (candidateVouchers.length > 0) state.vouchers = candidateVouchers;
+        if (candidatePricing.length > 0) state.officialPricing = candidatePricing;
+        if (Object.keys(candidateSiteConfig).length > 0) {
+          state.siteConfig = { ...state.siteConfig, ...candidateSiteConfig };
         }
+        if (candidateLeads.length > 0) state.leads = candidateLeads;
+        if (candidateDemoRequests.length > 0) state.demoRequests = candidateDemoRequests;
+        if (candidateCustomFaqs.length > 0) state.customFaqs = candidateCustomFaqs;
 
-        // Preserve vouchers database intact
-        if (parsed.vouchers && Array.isArray(parsed.vouchers) && parsed.vouchers.length > 0) {
-          state.vouchers = parsed.vouchers;
-        } else if (!state.vouchers || state.vouchers.length === 0) {
-          state.vouchers = JSON.parse(JSON.stringify(DEFAULT_STATE.vouchers || []));
-        }
-
-        // Ensure official WhatsApp number defaults to +8801521212196
+        // Ensure official defaults
         if (!state.siteConfig.whatsappNumber || state.siteConfig.whatsappNumber.length < 10) {
           state.siteConfig.whatsappNumber = "8801521212196";
         }
@@ -921,24 +949,13 @@
           state.siteConfig.facebookPageUrl = "https://facebook.com/slmptech";
         }
 
-        // Preserve admin pricing items (including user additions/deletions)
-        if (parsed.officialPricing && Array.isArray(parsed.officialPricing) && parsed.officialPricing.length > 0) {
-          state.officialPricing = parsed.officialPricing;
-        }
-
-        // Preserve captured leads & demo requests intact
-        if (parsed.leads && Array.isArray(parsed.leads)) {
-          state.leads = parsed.leads;
-        }
-        if (parsed.demoRequests && Array.isArray(parsed.demoRequests)) {
-          state.demoRequests = parsed.demoRequests;
-        }
-        if (parsed.customFaqs && Array.isArray(parsed.customFaqs)) {
-          state.customFaqs = parsed.customFaqs;
-        }
-        if (parsed.adminSession && typeof parsed.adminSession === "object") {
-          state.adminSession = { ...state.adminSession, ...parsed.adminSession };
-        }
+        // Re-save sanitized state back to all persistent keys to purge dummy data permanently
+        try {
+          const sanitized = JSON.stringify(state);
+          PERSISTENT_KEYS.forEach(k => {
+            try { localStorage.setItem(k, sanitized); } catch (e) {}
+          });
+        } catch (e) {}
 
         return state;
       } catch (e) {
@@ -2289,7 +2306,7 @@
 
               <!-- Bottom Contact Line -->
               <div class="border-t border-slate-100 pt-2 flex flex-wrap items-center justify-between text-[10px] font-semibold text-slate-500">
-                <span class="flex items-center gap-1">📞 +8801521212196</span>
+                <span class="flex items-center gap-1">🏢 Dhaka, Bangladesh</span>
                 <span class="flex items-center gap-1">✉️ contact@slmptech.com</span>
                 <span class="flex items-center gap-1">🌐 slmptech.com</span>
               </div>
@@ -2628,8 +2645,14 @@
               const rawClients = (appState.clients && appState.clients.length > 0) ? appState.clients : [];
               if (rawClients.length === 0) {
                 return `
-                  <div class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">
-                    No partner brands added yet.
+                  <div class="p-8 text-center bg-gradient-to-r from-slate-50 via-teal-50/40 to-slate-50 rounded-2xl border border-slate-200/80">
+                    <p class="text-sm font-bold text-slate-800">Partnering with Growing Businesses Across Bangladesh</p>
+                    <p class="text-xs text-slate-500 mt-1 max-w-xl mx-auto">From retail shops &amp; fashion brands to online services, we build digital infrastructure, websites, and high-ROI ad campaigns.</p>
+                    <div class="mt-4 flex items-center justify-center gap-3">
+                      <button type="button" onclick="navigateTo('/contact')" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-navy-950 text-xs font-bold transition-all shadow-sm">
+                        Become a Partner Brand →
+                      </button>
+                    </div>
                   </div>
                 `;
               }
@@ -3682,6 +3705,82 @@
       showToast("Client Removed", `"${cName}" has been removed.`);
     }
 
+    function recoverStoredClients() {
+      try {
+        const DUMMY_NAMES = new Set(["Apex Fashion BD", "Dhaka Gadget Hub", "Bengal Organic Foods", "Care Pharmacy & Retail", "New Client Brand"]);
+        let bestClients = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          try {
+            const raw = localStorage.getItem(k);
+            if (!raw || !raw.trim().startsWith("{")) continue;
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.clients) && parsed.clients.length > 0) {
+              const filtered = parsed.clients.filter(c => c && c.name && !DUMMY_NAMES.has(c.name.trim()));
+              if (filtered.length > bestClients.length) {
+                bestClients = filtered;
+              }
+            }
+          } catch (e) {}
+        }
+
+        if (bestClients.length > 0) {
+          appState.clients = bestClients;
+          saveState();
+          renderCurrentRoute();
+          showToast("Data Recovered", `Successfully restored ${bestClients.length} client(s) from storage.`);
+        } else {
+          showToast("No Prior Clients Found", "No custom client records found in browser storage. Click '➕ Add New Client' to add your clients.");
+        }
+      } catch (err) {
+        showToast("Recovery Error", err.message, true);
+      }
+    }
+
+    function exportDataBackup() {
+      try {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+        const dlAnchor = document.createElement("a");
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `slmptech-backup-${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast("Backup Exported", "Your full configuration and databases have been downloaded.");
+      } catch (e) {
+        showToast("Export Failed", e.message, true);
+      }
+    }
+
+    function importDataBackup(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && typeof imported === "object") {
+            if (Array.isArray(imported.clients)) appState.clients = imported.clients;
+            if (Array.isArray(imported.vouchers)) appState.vouchers = imported.vouchers;
+            if (Array.isArray(imported.officialPricing)) appState.officialPricing = imported.officialPricing;
+            if (imported.siteConfig && typeof imported.siteConfig === "object") {
+              appState.siteConfig = { ...appState.siteConfig, ...imported.siteConfig };
+            }
+            saveState();
+            renderCurrentRoute();
+            showToast("Backup Restored", "All data imported and saved successfully!");
+          } else {
+            showToast("Invalid File", "JSON structure does not match SLMPTech backup format.", true);
+          }
+        } catch (err) {
+          showToast("Import Failed", err.message, true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
     function saveAdminClients(event) {
       if (event) event.preventDefault();
       if (!appState.adminSession.authenticated || appState.adminSession.role !== "SUPER_ADMIN") {
@@ -4324,6 +4423,16 @@
                   <p class="text-xs text-slate-600 mt-0.5">Add client logos, names, and websites. When visitors click a client logo on your site, it will redirect directly to their website.</p>
                 </div>
                 <div class="flex items-center gap-2">
+                  <button type="button" onclick="recoverStoredClients()" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold flex items-center gap-1 shadow-sm transition-colors" title="Scan browser storage to recover previously entered clients">
+                    🔄 Recover Saved Data
+                  </button>
+                  <button type="button" onclick="exportDataBackup()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1 transition-colors" title="Download backup JSON">
+                    📥 Export JSON
+                  </button>
+                  <label class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer" title="Import backup JSON">
+                    📤 Import JSON
+                    <input type="file" accept=".json" onchange="importDataBackup(event)" class="hidden" />
+                  </label>
                   <button type="button" onclick="addAdminClientItem()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm transition-colors">
                     ➕ Add New Client
                   </button>
