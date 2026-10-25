@@ -697,7 +697,20 @@
         businessHours: "Saturday – Thursday, 10:00 AM – 8:00 PM (BST)",
         softwareName: "Commerce Control"
       },
-      clients: [],
+      clients: [
+        {
+          id: "client-daraz",
+          name: "Daraz",
+          logo: "/logos/daraz.png",
+          website: "https://www.daraz.com.bd"
+        },
+        {
+          id: "client-duri",
+          name: "Duri Lifestyle",
+          logo: "/logos/duri.png",
+          website: "https://loveduri.com"
+        }
+      ],
       vouchers: [
         {
           orderId: "T383",
@@ -865,7 +878,6 @@
         ]);
 
         const state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-        state.clients = [];
 
         // Scan all storage keys across versions to recover any user data
         let candidateClients = [];
@@ -930,8 +942,32 @@
           } catch (e) {}
         }
 
-        // Apply recovered user data
-        state.clients = candidateClients;
+        // Apply recovered user data and ensure Daraz & Duri are always preserved
+        if (candidateClients.length > 0) {
+          const hasDaraz = candidateClients.some(c => c && c.name && /daraz/i.test(c.name));
+          const hasDuri = candidateClients.some(c => c && c.name && /duri/i.test(c.name));
+          const mergedClients = [...candidateClients];
+          if (!hasDuri) {
+            mergedClients.unshift({
+              id: "client-duri",
+              name: "Duri Lifestyle",
+              logo: "/logos/duri.png",
+              website: "https://loveduri.com"
+            });
+          }
+          if (!hasDaraz) {
+            mergedClients.unshift({
+              id: "client-daraz",
+              name: "Daraz",
+              logo: "/logos/daraz.png",
+              website: "https://www.daraz.com.bd"
+            });
+          }
+          state.clients = mergedClients;
+        } else {
+          state.clients = JSON.parse(JSON.stringify(DEFAULT_STATE.clients));
+        }
+
         if (candidateVouchers.length > 0) state.vouchers = candidateVouchers;
         if (candidatePricing.length > 0) state.officialPricing = candidatePricing;
         if (Object.keys(candidateSiteConfig).length > 0) {
@@ -949,7 +985,7 @@
           state.siteConfig.facebookPageUrl = "https://facebook.com/slmptech";
         }
 
-        // Re-save sanitized state back to all persistent keys to purge dummy data permanently
+        // Re-save sanitized state back to all persistent keys to keep data intact
         try {
           const sanitized = JSON.stringify(state);
           PERSISTENT_KEYS.forEach(k => {
