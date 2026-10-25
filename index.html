@@ -23,15 +23,34 @@
 
   <!-- Tailwind CSS 3.4.17 -->
   <script src="https://cdn.tailwindcss.com/3.4.17">    function cleanSiteCache() {
+      // 1. Snapshot all admin & user data before cleaning cache
+      const masterKey = "slmptech_official_v4_discount";
+      let savedData = null;
+      try {
+        savedData = localStorage.getItem(masterKey) || localStorage.getItem("slmptech_master_persistent_state");
+      } catch (e) {}
+
+      // 2. Clear browser HTTP CacheStorage and Service Workers
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => caches.delete(name));
         });
       }
+
+      // 3. Clear temporary sessionStorage only
       try {
-        localStorage.clear();
         sessionStorage.clear();
       } catch (e) {}
+
+      // 4. Ensure admin database, pricing, and user leads remain 100% INTACT
+      try {
+        if (savedData) {
+          localStorage.setItem(masterKey, savedData);
+          localStorage.setItem("slmptech_master_persistent_state", savedData);
+        }
+      } catch (e) {}
+
+      // 5. Force a reload from server with cache-busting
       window.location.reload(true);
     }
   </script>
@@ -786,23 +805,53 @@
       }
     };
 
+    const PERSISTENT_KEYS = [
+      "slmptech_official_v4_discount",
+      "slmptech_master_persistent_state",
+      "slmptech_official_v3",
+      "slmptech_official_v2",
+      "bd_affordable_digital_agency_v2"
+    ];
+
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
-        const parsed = JSON.parse(raw);
-        const state = { ...JSON.parse(JSON.stringify(DEFAULT_STATE)), ...parsed };
-        
-        // Ensure all officialPricing items have originalPrice & 50% discount populated
-        if (state.officialPricing && Array.isArray(state.officialPricing)) {
-          state.officialPricing.forEach(p => {
-            const def = DEFAULT_STATE.officialPricing.find(d => d.id === p.id);
-            if (def) {
-              if (!p.originalPrice) p.originalPrice = def.originalPrice;
-              if (!p.discount) p.discount = def.discount;
-            }
-          });
+        let raw = null;
+        for (const k of PERSISTENT_KEYS) {
+          const val = localStorage.getItem(k);
+          if (val) {
+            raw = val;
+            break;
+          }
         }
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        
+        const parsed = JSON.parse(raw);
+        const state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+        // Deep merge siteConfig so user edits are preserved
+        if (parsed.siteConfig && typeof parsed.siteConfig === "object") {
+          state.siteConfig = { ...state.siteConfig, ...parsed.siteConfig };
+        }
+
+        // Preserve admin pricing items (including user additions/deletions)
+        if (parsed.officialPricing && Array.isArray(parsed.officialPricing) && parsed.officialPricing.length > 0) {
+          state.officialPricing = parsed.officialPricing;
+        }
+
+        // Preserve captured leads & demo requests intact
+        if (parsed.leads && Array.isArray(parsed.leads)) {
+          state.leads = parsed.leads;
+        }
+        if (parsed.demoRequests && Array.isArray(parsed.demoRequests)) {
+          state.demoRequests = parsed.demoRequests;
+        }
+        if (parsed.customFaqs && Array.isArray(parsed.customFaqs)) {
+          state.customFaqs = parsed.customFaqs;
+        }
+        if (parsed.adminSession && typeof parsed.adminSession === "object") {
+          state.adminSession = { ...state.adminSession, ...parsed.adminSession };
+        }
+
         return state;
       } catch (e) {
         return JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -811,7 +860,10 @@
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        const jsonStr = JSON.stringify(appState);
+        PERSISTENT_KEYS.forEach(k => {
+          try { localStorage.setItem(k, jsonStr); } catch (e) {}
+        });
       } catch (e) {}
       syncBrandUI();
     }
@@ -1933,14 +1985,14 @@
                 <span class="text-slate-300 font-medium">🇧🇩 Bangladesh's #1 Affordable Growth Partner</span>
               </div>
 
-              <!-- Main SEO-Rich Gradient Headline -->
+              <!-- Main Dynamic Headline from Admin Settings -->
               <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight leading-[1.12]">
-                Everything Your Business Needs to <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-300">Grow Online</span>.
+                ${escapeHtml(cfg.heroHeadline || "Everything Your Business Needs to Grow Online.")}
               </h1>
 
-              <!-- Supporting Description -->
+              <!-- Supporting Description from Admin Settings -->
               <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto font-normal">
-                ${escapeHtml(cfg.supportingStatement)}
+                ${escapeHtml(cfg.supportingStatement || cfg.brandMessage || "")}
               </p>
 
               <!-- Action CTAs -->
@@ -1958,19 +2010,19 @@
               </div>
             </div>
 
-            <!-- 5 FEATURED 50% DISCOUNT PACKAGES - HORIZONTAL ROW -->
+            <!-- 5 FEATURED 50% DISCOUNT PACKAGES - HORIZONTAL ROW (100% DYNAMIC FROM ADMIN) -->
             <div class="pt-8 border-t border-slate-800/80">
               <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
                 <div>
                   <div class="flex items-center gap-2.5">
                     <span class="text-lg sm:text-xl font-display font-extrabold text-white flex items-center gap-2">
-                      <span>🔥 5 Featured 50% Discount Packages</span>
+                      <span>🔥 Core 50% Discount Packages</span>
                     </span>
                     <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
                       Limited Spots
                     </span>
                   </div>
-                  <p class="text-xs text-slate-400 mt-1">Click any package for its individual scope page, or order instantly via WhatsApp with that package pre-filled.</p>
+                  <p class="text-xs text-slate-400 mt-1">Select any package for its individual scope page, or order instantly via WhatsApp with that package pre-filled.</p>
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-[11px] font-mono text-teal-300 bg-slate-900/90 border border-teal-500/30 px-3 py-1.5 rounded-xl">
@@ -1979,86 +2031,40 @@
                 </div>
               </div>
 
-              <!-- HORIZONTAL 5-COLUMN GRID -->
+              <!-- HORIZONTAL DYNAMIC GRID -->
               <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                ${[
-                  {
-                    num: "01",
-                    slug: "website-development",
-                    priceKey: "website-development",
-                    title: "Website Development",
-                    desc: "Responsive store/site, mobile-first, bKash & COD checkout",
-                    defOriginal: "৳20,000",
-                    defActive: "৳10,000",
-                    defBilling: "one time"
-                  },
-                  {
-                    num: "02",
-                    slug: "meta-ads",
-                    priceKey: "meta-ads",
-                    title: "Meta Ads Management",
-                    desc: "Campaigns, ROAS tuning & weekly performance scaling",
-                    defOriginal: "৳10,000/mo",
-                    defActive: "৳5,000/mo",
-                    defBilling: "monthly retainer"
-                  },
-                  {
-                    num: "03",
-                    slug: "google-ads",
-                    priceKey: "google-ads",
-                    title: "Google Ads Management",
-                    desc: "Search, Shopping & Performance Max buyer intent clicks",
-                    defOriginal: "৳10,000/mo",
-                    defActive: "৳5,000/mo",
-                    defBilling: "monthly retainer"
-                  },
-                  {
-                    num: "04",
-                    slug: "tracking-analytics",
-                    priceKey: "tracking-analytics",
-                    title: "Tracking & Meta CAPI",
-                    desc: "Server-side Pixel, GA4, GTM & zero loss data deduplication",
-                    defOriginal: "৳10,000",
-                    defActive: "৳5,000",
-                    defBilling: "one time setup"
-                  },
-                  {
-                    num: "05",
-                    slug: "website-pos",
-                    priceKey: "website-pos",
-                    title: "Website + POS Setup",
-                    desc: "E-Commerce storefront + retail barcode POS unified sync",
-                    defOriginal: "৳30,000",
-                    defActive: "৳15,000 starting",
-                    defBilling: "setup + optional SaaS"
-                  }
-                ].map((pkg) => {
-                  const pRec = getPriceRecord(pkg.priceKey);
-                  const original = pRec?.originalPrice || pkg.defOriginal;
-                  const active = pRec?.priceDisplay || pkg.defActive;
-                  const billing = pRec?.billing || pkg.defBilling;
+                ${(appState.officialPricing || []).slice(0, 5).map((p, idx) => {
+                  const numStr = String(idx + 1).padStart(2, "0");
+                  const slug = p.slug || p.id || "service";
+                  const title = p.service || "Digital Package";
+                  const desc = p.summary || "Full setup, execution, delivery and support.";
+                  const original = p.originalPrice || "";
+                  const active = p.priceDisplay || "৳5,000";
+                  const discount = p.discount || "50% OFF";
+                  const billing = p.billing || "one time";
+
                   return `
-                    <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-teal-400/80 p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-teal-500/10 cursor-pointer backdrop-blur-sm" onclick="navigateTo('/services/${pkg.slug}')">
+                    <div class="group relative rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-teal-400/80 p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-teal-500/10 cursor-pointer backdrop-blur-sm" onclick="navigateTo('/services/${escapeHtml(slug)}')">
                       <div>
                         <!-- Header Badges -->
                         <div class="flex items-center justify-between gap-1 mb-3">
-                          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">PKG ${pkg.num}</span>
-                          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">50% OFF</span>
+                          <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">PKG ${numStr}</span>
+                          ${discount ? `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">${escapeHtml(discount)}</span>` : ''}
                         </div>
 
-                        <!-- Title -->
+                        <!-- Title (Editable from Admin) -->
                         <h3 class="font-display font-bold text-white text-base leading-snug group-hover:text-teal-300 transition-colors">
-                          ${escapeHtml(pkg.title)}
+                          ${escapeHtml(title)}
                         </h3>
 
-                        <!-- Description -->
+                        <!-- Description (Editable from Admin) -->
                         <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed line-clamp-2">
-                          ${escapeHtml(pkg.desc)}
+                          ${escapeHtml(desc)}
                         </p>
 
-                        <!-- Pricing Box (Crossed out original + Big prominent 50% discount price) -->
+                        <!-- Pricing Box (Crossed out original + Big prominent 50% discount price - Editable from Admin) -->
                         <div class="mt-4 pt-3 border-t border-slate-800/80">
-                          <div class="text-[11px] text-slate-500 line-through font-mono font-medium">${escapeHtml(original)}</div>
+                          ${original ? `<div class="text-[11px] text-slate-500 line-through font-mono font-medium">${escapeHtml(original)}</div>` : ''}
                           <div class="text-xl sm:text-2xl font-display font-black text-emerald-400 tracking-tight mt-0.5">
                             ${escapeHtml(active)}
                           </div>
@@ -2069,12 +2075,12 @@
                       <!-- Action Buttons: Individual Page Link & Direct WhatsApp Order -->
                       <div class="mt-5 pt-3 border-t border-slate-800/80 space-y-2">
                         <!-- View Service Page -->
-                        <button type="button" onclick="event.stopPropagation(); navigateTo('/services/${pkg.slug}')" class="w-full py-2 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700 hover:border-teal-500/50 transition-all">
+                        <button type="button" onclick="event.stopPropagation(); navigateTo('/services/${escapeHtml(slug)}')" class="w-full py-2 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700 hover:border-teal-500/50 transition-all">
                           <span>View Details</span>
                           <svg class="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                         <!-- Direct WhatsApp Order Button with pre-filled package message -->
-                        <button type="button" onclick="event.stopPropagation(); handleWhatsAppAction('${escapeHtml(pkg.title)}', '${escapeHtml(active)}')" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all" title="Order ${escapeHtml(pkg.title)} on WhatsApp">
+                        <button type="button" onclick="event.stopPropagation(); handleWhatsAppAction('${escapeHtml(title)}', '${escapeHtml(active)}')" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 transition-all" title="Order ${escapeHtml(title)} on WhatsApp">
                           <span>💬 WhatsApp Order</span>
                         </button>
                       </div>
@@ -2349,10 +2355,48 @@
 
     // --- INDIVIDUAL SERVICE DETAIL PAGE (/services/:slug) ---
     function renderServiceDetailPage(slug) {
-      const svc = SERVICES_CATALOG.find((s) => s.slug === slug) || SERVICES_CATALOG[0];
-      const pRec = getPriceRecord(svc.priceKey);
+      // Find from SERVICES_CATALOG or fallback to dynamically added admin pricing
+      let svc = SERVICES_CATALOG.find((s) => s.slug === slug);
+      const pRec = getPriceRecord(slug) || (appState.officialPricing || []).find((p) => p.slug === slug || p.id === slug);
+      
+      if (!svc && pRec) {
+        svc = {
+          slug: pRec.slug || pRec.id,
+          num: "01",
+          title: pRec.service,
+          priceKey: pRec.id,
+          defaultPriceLabel: pRec.priceDisplay,
+          platforms: ["Custom Implementation", "Full Setup", "Support"],
+          overview: pRec.summary || "Complete professional service delivery tailored to Bangladeshi small businesses.",
+          problemsSolved: [
+            "Overpriced agencies charging high unpredictable fees.",
+            "Lack of dedicated technical execution and reliable follow-up.",
+            "Complex setup with poor results."
+          ],
+          deliverables: [
+            "End-to-end setup and implementation",
+            "Quality assurance & mobile responsive testing",
+            "Post-launch support & consultation"
+          ],
+          included: ["Full service setup as quoted", "Dedicated configuration", "Official warranty"],
+          excluded: ["Third-party paid subscriptions and advertising ad-spend"],
+          process: [
+            { step: "1. Intake & Scope", desc: "Understand your business requirements and verify goals." },
+            { step: "2. Architecture & Setup", desc: "Configure all technical assets and integrations." },
+            { step: "3. QA & Verification", desc: "Rigorous testing to ensure 100% functional readiness." },
+            { step: "4. Launch & Handover", desc: "Deploy live and provide operational onboarding." }
+          ],
+          faqs: [
+            { q: "How quickly is this service delivered?", a: "Standard turnaround is usually 48 to 72 hours depending on scope." },
+            { q: "How do I make the payment?", a: "We accept bKash, Nagad, and local bank transfers." }
+          ],
+          related: ["website-development", "meta-ads", "tracking-analytics"]
+        };
+      } else if (!svc) {
+        svc = SERVICES_CATALOG[0];
+      }
       const priceText = pRec ? `${pRec.priceDisplay} (${pRec.billing})` : svc.defaultPriceLabel;
-      const relatedList = SERVICES_CATALOG.filter((s) => svc.related.includes(s.slug));
+      const relatedList = SERVICES_CATALOG.filter((s) => (svc.related || []).includes(s.slug));
 
       return `
         <section class="bg-navy-900 text-white py-12 border-b border-slate-800">
